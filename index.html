@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Scholar Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#FAFAF7;--text:#1a1a1a;--accent:#8B2500;--muted:#666;--border:#d4d0c8;--card:#fff;--link:#2E5090;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+  .container{max-width:860px;margin:0 auto;padding:32px 20px 48px;}
+  header{border-bottom:3px solid var(--text);padding-bottom:14px;margin-bottom:8px;}
+  header h1{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:700;letter-spacing:-0.02em;line-height:1.15;}
+  .subtitle{font-size:0.92rem;color:var(--muted);margin-top:5px;font-weight:300;}
+  .controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:12px;}
+  .controls label{font-size:0.82rem;color:var(--muted);display:flex;align-items:center;gap:6px;}
+  .controls input[type=date],.controls select{padding:4px 8px;border:1px solid var(--border);border-radius:3px;font-size:0.82rem;background:#fff;font-family:inherit;}
+  .controls input[type=checkbox]{margin:0;}
+  .btn{padding:6px 18px;background:var(--text);color:#fff;border:none;border-radius:3px;font-size:0.82rem;font-weight:600;cursor:pointer;letter-spacing:0.04em;}
+  .btn:disabled{background:#999;cursor:wait;}.btn:hover:not(:disabled){background:#333;}
+  .count{font-size:0.78rem;color:var(--muted);margin-left:4px;}
+  .date-filter{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:0 0 8px;font-size:0.8rem;color:var(--muted);}
+  .date-filter.hidden{display:none;}
+  .nav{display:flex;flex-wrap:wrap;gap:6px;padding:12px 0 16px;border-bottom:1px solid var(--border);margin-bottom:28px;align-items:center;}
+  .nav a{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;padding:4px 10px;border-radius:2px;color:#fff;text-decoration:none;transition:opacity 0.2s;}
+  .nav a:hover{opacity:0.8;}
+  .nav-sep{font-size:0.6rem;color:var(--muted);align-self:center;margin:0 2px;letter-spacing:0.05em;text-transform:uppercase;font-weight:600;}
+  .group-header{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin:32px 0 6px;padding:10px 0 8px;border-top:2px solid var(--text);display:flex;align-items:center;gap:10px;}
+  .group-header:first-child{margin-top:0;border-top:none;}
+  .group-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .group-note{font-size:0.78rem;color:var(--muted);font-style:italic;margin-bottom:16px;font-family:'Source Sans 3',sans-serif;font-weight:400;text-transform:none;letter-spacing:0;}
+  .journal-section{margin-bottom:36px;scroll-margin-top:20px;}
+  .journal-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .journal-tag{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:3px 10px;border-radius:2px;color:#fff;}
+  .journal-name{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:700;}
+  .loading{padding:20px;color:var(--muted);font-size:0.85rem;font-style:italic;}
+  .error-box{padding:14px;background:#FFF3F0;border:1px solid #E8CCCC;border-radius:4px;font-size:0.85rem;color:var(--accent);}
+  .empty{padding:14px;color:var(--muted);font-size:0.85rem;font-style:italic;}
+  .card{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--border);padding:14px 18px;margin-bottom:10px;transition:border-color 0.2s;}
+  .card:hover{border-left-color:var(--accent);}
+  .card-title{font-family:'Cormorant Garamond',serif;font-size:1.08rem;font-weight:600;line-height:1.35;margin-bottom:5px;}
+  .card-title a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--border);}
+  .card-title a:hover{color:var(--accent);border-bottom-color:var(--accent);}
+  .card-authors{font-size:0.8rem;color:var(--muted);margin-bottom:6px;}
+  .card-abstract{font-size:0.83rem;color:#333;line-height:1.5;margin-bottom:6px;}
+  .card-meta{font-size:0.72rem;color:var(--accent);font-weight:600;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .card-meta a{color:var(--link);text-decoration:none;font-size:0.7rem;}
+  .card-meta a:hover{text-decoration:underline;}
+  .footer{font-size:0.75rem;color:var(--muted);border-top:2px solid var(--text);padding-top:14px;margin-top:32px;line-height:1.7;}
+  @media(max-width:600px){.container{padding:24px 14px 36px;}header h1{font-size:1.7rem;}.journal-name{font-size:1.15rem;}.card-title{font-size:1rem;}.controls{gap:8px;}.nav a{font-size:0.65rem;padding:3px 7px;}.group-header{font-size:1rem;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Weekly Publications Summary</h1>
+    <div class="subtitle">Communication, Media Studies &amp; Digital Culture</div>
+  </header>
+  <div class="controls">
+    <label>Show latest
+      <select id="numArticles">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+      </select>
+      per journal
+    </label>
+    <label><input type="checkbox" id="useDateFilter" onchange="toggleDateFilter()"> Filter by date</label>
+    <button class="btn" id="fetchBtn" onclick="fetchAll()">Fetch</button>
+    <span class="count" id="totalCount"></span>
+  </div>
+  <div class="date-filter hidden" id="dateControls">
+    <label>From <input type="date" id="startDate"></label>
+    <label>To <input type="date" id="endDate"></label>
+  </div>
+  <div class="nav" id="navMenu"></div>
+  <div id="results"></div>
+  <div class="footer">
+    <strong>Data source:</strong> Crossref API (api.crossref.org). All DOI links resolve to publisher pages.<br>
+    <strong>Default mode:</strong> Shows the latest Online First articles per journal. Enable "Filter by date" for a specific date range.<br>
+    <strong>Abstracts:</strong> SAGE journals reliably include abstracts via Crossref. Taylor &amp; Francis journals are fetched via OpenAlex API (which includes abstracts). Oxford and USC use Crossref (abstracts may be missing).
+  </div>
+</div>
+<script>
+const GROUPS = [
+  { id:"sage", name:"SAGE", color:"#2E5090", note:"Full abstracts, fast Crossref indexing, reliable OA detection" },
+  { id:"tf", name:"Taylor & Francis", color:"#6B4C8A", note:"ICS fetched via OpenAlex for abstracts. CSMC via Crossref (abstracts not available from T&F)." },
+  { id:"oup", name:"Oxford University Press", color:"#1A6B4E", note:"Good metadata but abstracts are hit or miss. These journals publish less frequently (bimonthly/quarterly)." },
+  { id:"usc", name:"USC Annenberg", color:"#7D6608", note:"Self-published, open access. May have limited Crossref coverage." },
+];
+
+const JOURNALS = [
+  // SAGE
+  {name:"New Media & Society",abbr:"NM&S",issn:"1461-4448",group:"sage"},
+  {name:"Media, Culture & Society",abbr:"MC&S",issn:"0163-4437",group:"sage"},
+  {name:"Television & New Media",abbr:"TNM",issn:"1527-4764",group:"sage"},
+  {name:"European Journal of Communication",abbr:"EJC",issn:"0267-3231",group:"sage"},
+  {name:"Social Media + Society",abbr:"SM+S",issn:"2056-3051",group:"sage"},
+  {name:"Big Data & Society",abbr:"BD&S",issn:"2053-9517",group:"sage"},
+  // Taylor & Francis
+  {name:"Information, Communication & Society",abbr:"ICS",issn:"1369-118X",group:"tf",useOpenAlex:true},
+  {name:"Critical Studies in Media Communication",abbr:"CSMC",issn:"1529-5036",group:"tf"},
+  // Oxford University Press
+  {name:"Communication, Culture & Critique",abbr:"CCC",issn:"1753-9129",group:"oup"},
+  {name:"Journal of Communication",abbr:"JoC",issn:"0021-9916",group:"oup"},
+  {name:"Communication Theory",abbr:"CT",issn:"1050-3293",group:"oup"},
+  // USC Annenberg
+  {name:"Int'l Journal of Communication",abbr:"IJoC",issn:"1932-8036",group:"usc"},
+];
+
+function getGroupColor(groupId){
+  const g=GROUPS.find(x=>x.id===groupId);
+  return g?g.color:"#666";
+}
+
+(function buildNav(){
+  const nav=document.getElementById("navMenu");
+  let html="",lastGroup="";
+  JOURNALS.forEach(j=>{
+    if(j.group!==lastGroup&&lastGroup!==""){
+      html+=`<span class="nav-sep">·</span>`;
+    }
+    lastGroup=j.group;
+    const id=j.issn.replace(/[^a-zA-Z0-9]/g,"");
+    const col=getGroupColor(j.group);
+    html+=`<a href="#j${id}" style="background:${col}">${j.abbr}</a>`;
+  });
+  nav.innerHTML=html;
+})();
+
+(function init(){
+  const end=new Date(),start=new Date();
+  start.setDate(start.getDate()-30);
+  document.getElementById("startDate").value=fmt(start);
+  document.getElementById("endDate").value=fmt(end);
+  fetchAll();
+})();
+
+function toggleDateFilter(){
+  const show=document.getElementById("useDateFilter").checked;
+  document.getElementById("dateControls").classList.toggle("hidden",!show);
+}
+
+function fmt(d){return d.toISOString().split("T")[0];}
+function stripHtml(s){return s?s.replace(/<[^>]*>/g,""):"";}
+
+function formatAuthors(authors){
+  if(!authors||authors.length===0)return "Authors not available";
+  const arr=authors.map(a=>{
+    const fam=a.family||"",giv=a.given||"";
+    const ini=giv.split(/[\s-]+/).filter(Boolean).map(n=>n.charAt(0)+".").join("");
+    return fam+(ini?", "+ini:"");
+  });
+  if(arr.length<=3)return arr.join("; ");
+  return arr[0]+"; "+arr[1]+" et al.";
+}
+
+function formatPubDate(parts){
+  if(!parts||parts.length===0)return null;
+  const d=new Date(parts[0],(parts[1]||1)-1,parts[2]||1);
+  return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+}
+
+function escHtml(s){const div=document.createElement("div");div.textContent=s;return div.innerHTML;}
+
+async function fetchJournal(issn,rows,startDate,endDate,useDate){
+  let url=`https://api.crossref.org/journals/${issn}/works?sort=published&order=desc&rows=${rows}&mailto=scholar-weekly@example.com`;
+  if(useDate&&startDate&&endDate){
+    url+=`&filter=from-pub-date:${startDate},until-pub-date:${endDate}`;
+  }
+  const res=await fetch(url);
+  if(!res.ok)throw new Error("HTTP "+res.status);
+  const data=await res.json();
+  return(data.message?.items||[]).map(item=>({
+    title:stripHtml(Array.isArray(item.title)?item.title[0]:item.title||"Untitled"),
+    authors:item.author||[],
+    doi:item.DOI||null,
+    url:item.URL||(item.DOI?"https://doi.org/"+item.DOI:null),
+    published:item.published?.["date-parts"]?.[0]||null,
+    type:item.type||"article",
+    isOA:(item.license||[]).some(l=>(l.URL||"").includes("creativecommons")),
+    volume:item.volume||null,
+    issue:item.issue||null,
+    page:item.page||null,
+    abstract:item.abstract?stripHtml(item.abstract).substring(0,320):null,
+  })).filter(a=>!/^book\s*(review|note)/i.test(a.title));
+}
+
+async function fetchJournalOpenAlex(issn,eIssn,name,rows){
+  const attempts=[
+    eIssn?`primary_location.source.issn:${eIssn}`:null,
+    `primary_location.source.issn:${issn}`,
+    `primary_location.source.display_name.search:${encodeURIComponent(name)}`,
+  ].filter(Boolean);
+
+  for(const filter of attempts){
+    try{
+      const url=`https://api.openalex.org/works?filter=${filter}&sort=publication_date:desc&per_page=${rows}&mailto=scholar-weekly@example.com`;
+      const res=await fetch(url);
+      if(!res.ok)continue;
+      const data=await res.json();
+      if(!data.results||data.results.length===0)continue;
+      return parseOpenAlexResults(data.results);
+    }catch(e){console.warn("OpenAlex attempt failed:",filter,e);}
+  }
+  throw new Error("OpenAlex: no results for any ISSN/name");
+}
+
+function parseOpenAlexResults(results){
+  return results.map(item=>{
+    const title=stripHtml(item.title||"Untitled");
+    const authors=(item.authorships||[]).map(a=>({
+      family:(a.author?.display_name||"").split(/\s+/).pop()||"",
+      given:(a.author?.display_name||"").split(/\s+/).slice(0,-1).join(" ")||"",
+    }));
+    const doi=item.doi?item.doi.replace("https://doi.org/",""):null;
+    const pubParts=item.publication_date?item.publication_date.split("-").map(Number):null;
+    let abstract=null;
+    if(item.abstract_inverted_index){
+      const idx=item.abstract_inverted_index;
+      const words=[];
+      for(const[word,positions] of Object.entries(idx)){
+        for(const pos of positions)words[pos]=word;
+      }
+      abstract=words.join(" ").substring(0,320);
+    }
+    return{title,authors,doi,url:doi?"https://doi.org/"+doi:null,published:pubParts,type:"article",
+      isOA:item.open_access?.is_oa||false,volume:null,issue:null,page:null,abstract};
+  }).filter(a=>!/^book\s*(review|note)/i.test(a.title));
+}
+
+function renderCard(a,groupColor){
+  const pubDate=formatPubDate(a.published);
+  const titleHtml=a.url
+    ?`<a href="${escHtml(a.url)}" target="_blank" rel="noopener">${escHtml(a.title)}</a>`
+    :escHtml(a.title);
+  let metaParts=[];
+  if(a.isOA)metaParts.push('<span style="color:#8B2500;">★ Open Access</span>');
+  if(pubDate)metaParts.push(pubDate);
+  if(a.volume)metaParts.push("Vol. "+a.volume+(a.issue?", No. "+a.issue:""));
+  if(a.page)metaParts.push("pp. "+a.page);
+  if(a.doi)metaParts.push(`<a href="https://doi.org/${escHtml(a.doi)}" target="_blank" rel="noopener">DOI: ${escHtml(a.doi)}</a>`);
+  return`<div class="card" style="border-left-color:${groupColor}">
+    <div class="card-title">${titleHtml}</div>
+    <div class="card-authors">${escHtml(formatAuthors(a.authors))}</div>
+    ${a.abstract?`<div class="card-abstract">${escHtml(a.abstract)}${a.abstract.length>=320?"...":""}</div>`:""}
+    <div class="card-meta">${metaParts.join(" · ")}</div>
+  </div>`;
+}
+
+function renderSection(journal,articles,error){
+  const id=journal.issn.replace(/[^a-zA-Z0-9]/g,"");
+  const col=getGroupColor(journal.group);
+  let body="";
+  if(error)body=`<div class="error-box">Could not retrieve data. Crossref may be unavailable or this journal may not be fully indexed.</div>`;
+  else if(articles&&articles.length===0)body=`<div class="empty">No articles found.</div>`;
+  else if(articles)body=articles.map(a=>renderCard(a,col)).join("");
+  return`<div class="journal-section" id="j${id}">
+    <div class="journal-header">
+      <span class="journal-tag" style="background:${col}">${escHtml(journal.abbr)}</span>
+      <span class="journal-name">${escHtml(journal.name)}</span>
+    </div>${body}</div>`;
+}
+
+function renderGroupHeader(group){
+  return`<div class="group-header"><span class="group-dot" style="background:${group.color}"></span>${escHtml(group.name)}</div><div class="group-note">${group.note}</div>`;
+}
+
+async function fetchAll(){
+  const btn=document.getElementById("fetchBtn"),resultsEl=document.getElementById("results"),countEl=document.getElementById("totalCount");
+  const rows=parseInt(document.getElementById("numArticles").value);
+  const useDate=document.getElementById("useDateFilter").checked;
+  const startDate=document.getElementById("startDate").value;
+  const endDate=document.getElementById("endDate").value;
+
+  btn.disabled=true;btn.textContent="Fetching...";countEl.textContent="";resultsEl.innerHTML="";
+  let totalArticles=0,html="",lastGroup="";
+
+  for(const j of JOURNALS){
+    if(j.group!==lastGroup){
+      const g=GROUPS.find(x=>x.id===j.group);
+      if(g)html+=renderGroupHeader(g);
+      lastGroup=j.group;
+    }
+
+    resultsEl.innerHTML=html+renderSection(j,null,false).replace("</div></div>",'<div class="loading">Fetching'+(j.useOpenAlex?' via OpenAlex':'')+'...</div></div></div>');
+    try{
+      let articles,source="";
+      if(j.useOpenAlex&&!useDate){
+        try{
+          articles=await fetchJournalOpenAlex(j.issn,j.eIssn||null,j.name,rows);
+          source="openalex";
+        }catch(oaErr){
+          console.warn("OpenAlex failed for "+j.abbr+", falling back to Crossref",oaErr);
+          articles=await fetchJournal(j.issn,rows,null,null,false);
+          source="crossref-fallback";
+        }
+      }else{
+        articles=await fetchJournal(j.issn,useDate?50:rows,useDate?startDate:null,useDate?endDate:null,useDate);
+        source="crossref";
+      }
+      totalArticles+=articles.length;
+      let sectionHtml=renderSection(j,articles,false);
+      if(source==="crossref-fallback")sectionHtml=sectionHtml.replace("</div>",`<div style="font-size:0.75rem;color:var(--accent);font-style:italic;margin-top:-4px;margin-bottom:12px;">⚠ OpenAlex unavailable — showing Crossref data (abstracts may be missing)</div></div>`);
+      html+=sectionHtml;
+    }catch(err){
+      console.error("Error fetching "+j.issn,err);
+      html+=renderSection(j,null,true);
+    }
+    resultsEl.innerHTML=html;
+  }
+
+  btn.disabled=false;btn.textContent="Fetch";
+  countEl.textContent=totalArticles+" article"+(totalArticles!==1?"s":"")+" found";
+}
+</script>
+</body>
+</html>
